@@ -1,0 +1,394 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2025-09-26T07:19:42Z"
+    generation: 1
+    labels:
+      name: app
+    name: app
+    namespace: elastic-stack
+    resourceVersion: "2591"
+    uid: ade8d4b7-16f3-4d71-a781-35d9adffc02b
+  spec:
+    containers:
+    - image: kodekloud/event-simulator
+      imagePullPolicy: Always
+      name: app
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /log
+        name: log-volume
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-6rf8k
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    initContainers:
+    - image: kodekloud/filebeat-configured
+      imagePullPolicy: Always
+      name: sidecar
+      resources: {}
+      restartPolicy: Always
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/log/event-simulator/
+        name: log-volume
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-6rf8k
+        readOnly: true
+    nodeName: controlplane
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - hostPath:
+        path: /var/log/webapp
+        type: DirectoryOrCreate
+      name: log-volume
+    - name: kube-api-access-6rf8k
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:19:46Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:19:46Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:19:47Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:19:47Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:19:42Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://e6b39dc1e30ef00aca9bf2daabaddb3a111ad816ed4f4369bd56a9133eb74180
+      image: docker.io/kodekloud/event-simulator:latest
+      imageID: docker.io/kodekloud/event-simulator@sha256:1e3e9c72136bbc76c96dd98f29c04f298c3ae241c7d44e2bf70bcc209b030bf9
+      lastState: {}
+      name: app
+      ready: true
+      resources: {}
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-09-26T07:19:47Z"
+      volumeMounts:
+      - mountPath: /log
+        name: log-volume
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-6rf8k
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 192.168.59.128
+    hostIPs:
+    - ip: 192.168.59.128
+    initContainerStatuses:
+    - containerID: containerd://e9222280847f11d14bc0c5b372b41adfb53ca0f74d9157a95c2d8e270e801ce9
+      image: docker.io/kodekloud/filebeat-configured:latest
+      imageID: docker.io/kodekloud/filebeat-configured@sha256:c49dab47599a42a3d80013b28d883bdd6276387e281de4ab96dddb6fbee360e7
+      lastState: {}
+      name: sidecar
+      ready: true
+      resources: {}
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-09-26T07:19:46Z"
+      volumeMounts:
+      - mountPath: /var/log/event-simulator/
+        name: log-volume
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-6rf8k
+        readOnly: true
+        recursiveReadOnly: Disabled
+    phase: Running
+    podIP: 172.17.0.13
+    podIPs:
+    - ip: 172.17.0.13
+    qosClass: BestEffort
+    startTime: "2025-09-26T07:19:42Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2025-09-26T07:00:06Z"
+    generation: 1
+    labels:
+      name: elastic-search
+    name: elastic-search
+    namespace: elastic-stack
+    resourceVersion: "959"
+    uid: 364bc0e1-01ab-4cb2-85ae-e5b31cfef96a
+  spec:
+    containers:
+    - env:
+      - name: discovery.type
+        value: single-node
+      image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
+      imagePullPolicy: IfNotPresent
+      name: elastic-search
+      ports:
+      - containerPort: 9200
+        protocol: TCP
+      - containerPort: 9300
+        protocol: TCP
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-fr9xq
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: controlplane
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-fr9xq
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:00:27Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:00:06Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:00:27Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:00:27Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:00:06Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://00522be8f132c6656f9221d6a5f3e812cdd50ec52533332db471d1a7573d4423
+      image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
+      imageID: docker.elastic.co/elasticsearch/elasticsearch@sha256:3da16b2f3b1d4e151c44f1a54f4f29d8be64884a64504b24ebcbdb4e14c80aa1
+      lastState: {}
+      name: elastic-search
+      ready: true
+      resources: {}
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-09-26T07:00:27Z"
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-fr9xq
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 192.168.59.128
+    hostIPs:
+    - ip: 192.168.59.128
+    phase: Running
+    podIP: 172.17.0.4
+    podIPs:
+    - ip: 172.17.0.4
+    qosClass: BestEffort
+    startTime: "2025-09-26T07:00:06Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2025-09-26T07:00:07Z"
+    generation: 1
+    labels:
+      name: kibana
+    name: kibana
+    namespace: elastic-stack
+    resourceVersion: "1037"
+    uid: 9e281de0-c46e-4ff1-a9e5-3b213063326f
+  spec:
+    containers:
+    - env:
+      - name: ELASTICSEARCH_URL
+        value: http://elasticsearch:9200
+      image: kibana:6.4.2
+      imagePullPolicy: IfNotPresent
+      name: kibana
+      ports:
+      - containerPort: 5601
+        protocol: TCP
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-gjbcc
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: controlplane
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-gjbcc
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:01:04Z"
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:00:07Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:01:04Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:01:04Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2025-09-26T07:00:07Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://8aebfc7a4d4fa1ce2b3afc4ce9bf2355e770ffc0585243527efa8f3422e61085
+      image: docker.io/library/kibana:6.4.2
+      imageID: docker.io/library/kibana@sha256:989164ee9d20dfc5ba2d65339a7cf9309e75f6aaf92392fc875a47de8a733f97
+      lastState: {}
+      name: kibana
+      ready: true
+      resources: {}
+      restartCount: 0
+      started: true
+      state:
+        running:
+          startedAt: "2025-09-26T07:01:03Z"
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-gjbcc
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 192.168.59.128
+    hostIPs:
+    - ip: 192.168.59.128
+    phase: Running
+    podIP: 172.17.0.7
+    podIPs:
+    - ip: 172.17.0.7
+    qosClass: BestEffort
+    startTime: "2025-09-26T07:00:07Z"
+kind: List
+metadata:
+  resourceVersion: ""
